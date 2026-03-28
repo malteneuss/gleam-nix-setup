@@ -10,12 +10,10 @@
 
   outputs = { flake-parts, ... } @ inputs: flake-parts.lib.mkFlake { inherit inputs; } {
     imports = [
-      # ./module.nix
-      # inputs.foo.flakeModule
+      # other flake-parts modules
     ];
 
     perSystem = { config, self', inputs', pkgs, system, ... }: let 
-      # test-gleam = inputs'.gleam2nix.lib.buildGleamApplication {
       test-gleam = inputs.gleam2nix.lib."${system}".buildGleamApplication {
         pname = "test-gleam";
         version = "1.0.0";
@@ -38,11 +36,15 @@
       # packages.default = pkgs.hello;
       devShells.default = pkgs.mkShell {
         packages = with pkgs; [
-          # Add your dev tools here, e.g.:
-          erlang
+          # gleam compiler, language server, formatter etc.
           gleam
-          # inputs'.gleam2nix.packages.gleam2nix
+          # BEAM virtual machine/Erlang interpreter
+          erlang
+          # Erlang package manager (used by gleam)
+          rebar3
+          # Convert gleam.toml dependencies into Nix dependencies gleam.nix
           inputs.gleam2nix.packages.${system}.gleam2nix
+          # Other dev tools and dependencies like treefmt
           # ...
         ];
       };
